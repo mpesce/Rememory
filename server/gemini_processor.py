@@ -19,13 +19,17 @@ class GeminiProcessor:
             raise ValueError("Gemini API key is required")
 
         genai.configure(api_key=api_key)
-        # Using Gemini 2.0 Flash (latest available model)
-        # Note: Gemini 3.0 Pro may not be available yet, using latest production model
+        # Using Gemini 3.0 Pro (released November 2025)
         try:
-            self.model = genai.GenerativeModel('gemini-2.0-flash-exp')
-        except Exception:
-            # Fallback to stable model if experimental not available
-            self.model = genai.GenerativeModel('gemini-1.5-pro')
+            self.model = genai.GenerativeModel('gemini-3-pro-preview-11-2025')
+        except Exception as e:
+            print(f"[Gemini] Warning: Could not load Gemini 3 Pro, trying fallback: {str(e)}")
+            try:
+                # Fallback to Gemini 2.0 Flash
+                self.model = genai.GenerativeModel('gemini-2.0-flash-exp')
+            except Exception:
+                # Final fallback to stable model
+                self.model = genai.GenerativeModel('gemini-1.5-pro')
 
         print(f"[Gemini] Initialized with model: {self.model.model_name}")
 

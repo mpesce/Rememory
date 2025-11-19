@@ -1,13 +1,13 @@
 # Rememory - Personal Memory Capture System
 
-Rememory is an assistive technology system that turns a smartphone into a full-featured capture device for individuals with memory disorders. It continuously captures GPS location, audio, and photos, then uses Google Gemini AI to provide real-time situational awareness.
+Rememory is an assistive technology system that turns a smartphone into a full-featured capture device for individuals with memory disorders. It continuously captures GPS location, audio, and photos, then uses Google Gemini 3 Pro AI to provide real-time situational awareness.
 
 ## Features
 
 - **Continuous GPS Tracking**: Monitors location in real-time
 - **Audio Streaming**: Captures ambient audio for conversation transcription
 - **Photo Capture**: Takes photos at configurable intervals (default: every 60 seconds)
-- **AI-Powered State Generation**: Uses Google Gemini to synthesize location, audio, and visual data into a coherent summary
+- **AI-Powered State Generation**: Uses Google Gemini 3 Pro to synthesize location, audio, and visual data into a coherent summary
 - **Real-Time Updates**: State refreshes every 3 minutes with current context
 - **Simple Web Interface**: No app installation required - works in any mobile browser
 
@@ -97,7 +97,7 @@ Photo directory: /path/to/Rememory/data/photos
 Log directory: /path/to/Rememory/data/logs
 ============================================================
 [Background Task] State updater started (3-minute interval)
-[Gemini] Initialized with model: gemini-2.0-flash-exp
+[Gemini] Initialized with model: gemini-3-pro-preview-11-2025
  * Running on all addresses (0.0.0.0)
  * Running on http://127.0.0.1:5000
 ```
@@ -265,7 +265,7 @@ Potential improvements for future versions:
 - **Python 3.8+**
 - **Flask**: Web framework
 - **Flask-SocketIO**: WebSocket support for real-time communication
-- **Google Generative AI**: Gemini API integration
+- **Google Generative AI**: Gemini 3 Pro API integration (released November 2025)
 
 ### Frontend Stack
 - **Vanilla HTML/CSS/JavaScript**: No frameworks
