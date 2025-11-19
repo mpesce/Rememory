@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rememory - Your Memory Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #dc3545;
+        }
+
+        .status-dot.connected {
+            background: #28a745;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .current-state {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            min-height: 100px;
+        }
+
+        .current-state h2 {
+            color: #1976d2;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .current-state p {
+            line-height: 1.6;
+            font-size: 1.1em;
+            color: #333;
+            white-space: pre-wrap;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .controls {
+            margin-top: 20px;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+
+        .range-value {
+            display: inline-block;
+            margin-left: 10px;
+            padding: 4px 12px;
+            background: #667eea;
+            color: white;
+            border-radius: 12px;
+            font-size: 0.9em;
+        }
+
+        .button {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .button-primary {
+            background: #28a745;
+            color: white;
+        }
+
+        .button-primary:hover {
+            background: #218838;
+        }
+
+        .button-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .button-danger:hover {
+            background: #c82333;
+        }
+
+        .button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .permissions-warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .permissions-warning h3 {
+            color: #856404;
+            margin-bottom: 8px;
+        }
+
+        .last-update {
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 15px;
+            font-style: italic;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .video-preview {
+            display: none;
+            width: 100%;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .audio-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .audio-bars {
+            display: flex;
+            gap: 3px;
+            height: 20px;
+            align-items: flex-end;
+        }
+
+        .audio-bar {
+            width: 4px;
+            background: #667eea;
+            border-radius: 2px;
+            animation: audioWave 0.8s infinite ease-in-out;
+        }
+
+        .audio-bar:nth-child(2) { animation-delay: 0.1s; }
+        .audio-bar:nth-child(3) { animation-delay: 0.2s; }
+        .audio-bar:nth-child(4) { animation-delay: 0.3s; }
+        .audio-bar:nth-child(5) { animation-delay: 0.4s; }
+
+        @keyframes audioWave {
+            0%, 100% { height: 5px; }
+            50% { height: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 Rememory</h1>
+            <p>Your Personal Memory Assistant</p>
+        </div>
+
+        <div class="card">
+            <div class="status-indicator">
+                <div class="status-dot" id="statusDot"></div>
+                <div>
+                    <strong>Status:</strong> <span id="connectionStatus">Connecting...</span>
+                </div>
+            </div>
+
+            <div id="permissionsWarning" class="permissions-warning hidden">
+                <h3>⚠️ Permissions Required</h3>
+                <p>Rememory needs access to your camera, microphone, and location to work properly. Please grant these permissions when prompted.</p>
+            </div>
+
+            <div class="current-state">
+                <h2>Current Situation</h2>
+                <p id="currentState">Initializing Rememory...</p>
+                <div class="last-update">
+                    Last updated: <span id="lastUpdate">Never</span>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="photoCount">0</div>
+                    <div class="stat-label">Photos Captured</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="gpsCount">0</div>
+                    <div class="stat-label">GPS Updates</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="audioCount">0</div>
+                    <div class="stat-label">Audio Chunks</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="uptime">0:00</div>
+                    <div class="stat-label">Session Time</div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label>
+                        Photo Capture Interval
+                        <span class="range-value" id="photoIntervalValue">60 seconds</span>
+                    </label>
+                    <input type="range" id="photoInterval" min="10" max="300" value="60" step="10">
+                </div>
+
+                <button class="button button-primary" id="startButton">
+                    Start Rememory
+                </button>
+                <button class="button button-danger hidden" id="stopButton">
+                    Stop Rememory
+                </button>
+            </div>
+
+            <div class="audio-indicator hidden" id="audioIndicator">
+                <div class="audio-bars">
+                    <div class="audio-bar"></div>
+                    <div class="audio-bar"></div>
+                    <div class="audio-bar"></div>
+                    <div class="audio-bar"></div>
+                    <div class="audio-bar"></div>
+                </div>
+                <span>Recording audio...</span>
+            </div>
+
+            <video id="videoPreview" class="video-preview" autoplay playsinline></video>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        // Application state
+        const state = {
+            isRunning: false,
+            socket: null,
+            mediaStream: null,
+            audioRecorder: null,
+            gpsWatchId: null,
+            photoIntervalId: null,
+            photoInterval: 60000, // milliseconds
+            stats: {
+                photos: 0,
+                gps: 0,
+                audio: 0
+            },
+            startTime: null
+        };
+
+        // DOM elements
+        const elements = {
+            statusDot: document.getElementById('statusDot'),
+            connectionStatus: document.getElementById('connectionStatus'),
+            permissionsWarning: document.getElementById('permissionsWarning'),
+            currentState: document.getElementById('currentState'),
+            lastUpdate: document.getElementById('lastUpdate'),
+            photoCount: document.getElementById('photoCount'),
+            gpsCount: document.getElementById('gpsCount'),
+            audioCount: document.getElementById('audioCount'),
+            uptime: document.getElementById('uptime'),
+            photoInterval: document.getElementById('photoInterval'),
+            photoIntervalValue: document.getElementById('photoIntervalValue'),
+            startButton: document.getElementById('startButton'),
+            stopButton: document.getElementById('stopButton'),
+            audioIndicator: document.getElementById('audioIndicator'),
+            videoPreview: document.getElementById('videoPreview')
+        };
+
+        // Initialize WebSocket connection
+        function initializeWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const host = window.location.hostname;
+            const port = window.location.port || 5000;
+
+            state.socket = io(`${window.location.protocol}//${host}:${port}`);
+
+            state.socket.on('connect', () => {
+                updateConnectionStatus(true);
+                console.log('Connected to Rememory server');
+            });
+
+            state.socket.on('disconnect', () => {
+                updateConnectionStatus(false);
+                console.log('Disconnected from server');
+            });
+
+            state.socket.on('state_update', (data) => {
+                updateCurrentState(data.state, data.timestamp);
+            });
+
+            state.socket.on('photo_saved', (data) => {
+                console.log('Photo saved:', data.filename);
+            });
+
+            state.socket.on('connected', (data) => {
+                updateCurrentState(data.state, data.timestamp);
+            });
+        }
+
+        // Update connection status UI
+        function updateConnectionStatus(connected) {
+            if (connected) {
+                elements.statusDot.classList.add('connected');
+                elements.connectionStatus.textContent = 'Connected';
+            } else {
+                elements.statusDot.classList.remove('connected');
+                elements.connectionStatus.textContent = 'Disconnected';
+            }
+        }
+
+        // Update current state display
+        function updateCurrentState(stateText, timestamp) {
+            elements.currentState.textContent = stateText;
+            if (timestamp) {
+                const date = new Date(timestamp);
+                elements.lastUpdate.textContent = date.toLocaleTimeString();
+            }
+        }
+
+        // Request permissions and start capture
+        async function startRememory() {
+            try {
+                // Request camera and microphone permissions
+                state.mediaStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' },
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        sampleRate: 44100
+                    }
+                });
+
+                // Show video preview (optional)
+                // elements.videoPreview.srcObject = state.mediaStream;
+                // elements.videoPreview.style.display = 'block';
+
+                // Start audio recording
+                startAudioRecording();
+
+                // Start GPS tracking
+                startGPSTracking();
+
+                // Start photo capture
+                startPhotoCapture();
+
+                // Update UI
+                state.isRunning = true;
+                state.startTime = Date.now();
+                elements.startButton.classList.add('hidden');
+                elements.stopButton.classList.remove('hidden');
+                elements.audioIndicator.classList.remove('hidden');
+                elements.permissionsWarning.classList.add('hidden');
+
+                // Start uptime counter
+                startUptimeCounter();
+
+                console.log('Rememory started successfully');
+
+            } catch (error) {
+                console.error('Error starting Rememory:', error);
+                elements.permissionsWarning.classList.remove('hidden');
+                alert('Could not start Rememory. Please ensure you grant camera, microphone, and location permissions.');
+            }
+        }
+
+        // Stop all capture
+        function stopRememory() {
+            // Stop media stream
+            if (state.mediaStream) {
+                state.mediaStream.getTracks().forEach(track => track.stop());
+                state.mediaStream = null;
+            }
+
+            // Stop audio recording
+            if (state.audioRecorder) {
+                state.audioRecorder.stop();
+                state.audioRecorder = null;
+            }
+
+            // Stop GPS tracking
+            if (state.gpsWatchId) {
+                navigator.geolocation.clearWatch(state.gpsWatchId);
+                state.gpsWatchId = null;
+            }
+
+            // Stop photo capture
+            if (state.photoIntervalId) {
+                clearInterval(state.photoIntervalId);
+                state.photoIntervalId = null;
+            }
+
+            // Update UI
+            state.isRunning = false;
+            elements.startButton.classList.remove('hidden');
+            elements.stopButton.classList.add('hidden');
+            elements.audioIndicator.classList.add('hidden');
+            elements.videoPreview.style.display = 'none';
+
+            console.log('Rememory stopped');
+        }
+
+        // Start continuous audio recording
+        function startAudioRecording() {
+            const audioStream = new MediaStream(
+                state.mediaStream.getAudioTracks()
+            );
+
+            state.audioRecorder = new MediaRecorder(audioStream, {
+                mimeType: 'audio/webm'
+            });
+
+            state.audioRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    sendAudioChunk(event.data);
+                }
+            };
+
+            // Record in 5-second chunks for continuous streaming
+            state.audioRecorder.start(5000);
+
+            state.audioRecorder.onstop = () => {
+                if (state.isRunning) {
+                    // Restart recording for continuous capture
+                    setTimeout(() => {
+                        if (state.isRunning && state.audioRecorder) {
+                            state.audioRecorder.start(5000);
+                        }
+                    }, 100);
+                }
+            };
+        }
+
+        // Send audio chunk to server
+        function sendAudioChunk(audioBlob) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64Audio = reader.result.split(',')[1];
+                state.socket.emit('audio_chunk', {
+                    audio: base64Audio,
+                    timestamp: new Date().toISOString()
+                });
+                state.stats.audio++;
+                elements.audioCount.textContent = state.stats.audio;
+            };
+            reader.readAsDataURL(audioBlob);
+        }
+
+        // Start GPS tracking
+        function startGPSTracking() {
+            if (!navigator.geolocation) {
+                console.error('Geolocation not supported');
+                return;
+            }
+
+            state.gpsWatchId = navigator.geolocation.watchPosition(
+                (position) => {
+                    const gpsData = {
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                        accuracy: position.coords.accuracy,
+                        altitude: position.coords.altitude,
+                        heading: position.coords.heading,
+                        speed: position.coords.speed
+                    };
+
+                    state.socket.emit('gps_update', gpsData);
+                    state.stats.gps++;
+                    elements.gpsCount.textContent = state.stats.gps;
+                },
+                (error) => {
+                    console.error('GPS error:', error);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                }
+            );
+        }
+
+        // Start photo capture
+        function startPhotoCapture() {
+            // Capture first photo immediately
+            capturePhoto();
+
+            // Then capture at intervals
+            state.photoIntervalId = setInterval(() => {
+                capturePhoto();
+            }, state.photoInterval);
+        }
+
+        // Capture a single photo
+        function capturePhoto() {
+            const video = document.createElement('video');
+            video.srcObject = state.mediaStream;
+            video.play();
+
+            video.onloadedmetadata = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+
+                const context = canvas.getContext('2d');
+                context.drawImage(video, 0, 0);
+
+                const imageData = canvas.toDataURL('image/jpeg', 0.8);
+
+                state.socket.emit('photo_capture', {
+                    image: imageData,
+                    timestamp: new Date().toISOString()
+                });
+
+                state.stats.photos++;
+                elements.photoCount.textContent = state.stats.photos;
+
+                video.srcObject = null;
+            };
+        }
+
+        // Start uptime counter
+        function startUptimeCounter() {
+            setInterval(() => {
+                if (state.isRunning && state.startTime) {
+                    const elapsed = Date.now() - state.startTime;
+                    const minutes = Math.floor(elapsed / 60000);
+                    const seconds = Math.floor((elapsed % 60000) / 1000);
+                    elements.uptime.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                }
+            }, 1000);
+        }
+
+        // Photo interval slider
+        elements.photoInterval.addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            state.photoInterval = value * 1000;
+            elements.photoIntervalValue.textContent = `${value} seconds`;
+
+            // Restart photo capture with new interval if running
+            if (state.isRunning) {
+                clearInterval(state.photoIntervalId);
+                state.photoIntervalId = setInterval(() => {
+                    capturePhoto();
+                }, state.photoInterval);
+            }
+        });
+
+        // Button event listeners
+        elements.startButton.addEventListener('click', startRememory);
+        elements.stopButton.addEventListener('click', stopRememory);
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            initializeWebSocket();
+        });
+
+        // Clean up on page unload
+        window.addEventListener('beforeunload', () => {
+            if (state.isRunning) {
+                stopRememory();
+            }
+        });
+    </script>
+</body>
+</html>
